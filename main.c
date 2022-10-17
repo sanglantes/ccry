@@ -1,37 +1,44 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include "lib/gmp/gmp.h"
+#include <stdint.h>
+#include <gmp.h>
 
 
+//typedef struct RSAPROFILE
+//{
+//	char q, p, public_exp, phi, mod_inv [];
+//} rsa_p;
+//
+//mpz_t* extended_gcd(mpz_t public_exp, mpz_t phi)
+//{
+//	mpz_t inverse;
+//	mpz_set_ui(inverse, 1077);
+//	mpz_t* inv = &inverse;
+//	return inv;	
+//}
+//
+//char rsa_gen(uint16_t bit_size, char* mr_flag) // blueprint for generating RSA key pairs.
+//{
+//	rsa_p rsaprofile;
+//
+//	rsaprofile.p = pgen(bit_size);
+//	rsaprofile.q = pgen(bit_size);
+//	rsaprofile.public_exp = "65537";
+//	if (mr_flag != NULL) {
+//		rsaprofile.p = miller_rabin(rsaprofile.p);
+//		rsaprofile.q = miller_rabin(rsaprofile.q);
+//	}
+//
+//	rsaprofile.phi = phi_func(rsaprofile.p, rsaprofile.q);
+//	rsaprofile.mod_inv =  extended_gcd(rsaprofile.public_exp, rsaprofile.p);
+//}
 
-int factorial(int n)
+int main(int argc, int argv)
 {
-	int c = 1;
-	for (int i = 1; i <= n; i++) 
-	{
-		c = c * i;
-		printf("%d \t %d \n", c, c*i);
-	}
-	return c;
-}
-
-
-int main(int argc)
-{
-	factorial(5);
-	char inputstr[4096];
-	mpz_t gmp_num;
-	int flag;
-	scanf("%s", inputstr);
+	mpz_t b, exp, n, rop;
+//	mpz_inits(b, exp, n, NULL); init(s) is never necessary as GMP handles memory allocation. https://gmplib.org/manual/Initializing-Integers
+	gmp_scanf("%Zd %Zd %Zd", &b, &exp, &n);
 	
-	mpz_init(gmp_num);
-	mpz_set_ui(gmp_num, 0);
-	flag = mpz_set_str(gmp_num, inputstr, 10);
-	assert(flag == 0);
-	mpz_add_ui(gmp_num, gmp_num, 3);
-	mpz_out_str(stdout, 10, gmp_num);
-
-
+	mpz_powm(rop, b, exp, n);
+	gmp_printf("%Zd\n", rop);
 	return 0;
 }
