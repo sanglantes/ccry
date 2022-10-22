@@ -52,30 +52,29 @@ void impz_random(mpz_t rop, mp_bitcnt_t s_range) { // Generate random number wit
 	mpz_urandomb(rop, state, s_range); // Using mpz_urandomb to generate an integer between 0 and 2^n-1. Alternatively, use mpz_urandomm for 0 through n-1.
 }
 
-void fermat_algorithm(mpz_t p) {
-	// An algorithm that utilizes Euler's generalization of Fermat's little theorem for finding primes.
-	// This theorem is not resistant against strong pseudoprimes such as Carmichael numbers.
-	// Use Miller-Rabin algorithm to confirm with k certainty that p is prime.
-	
-	mpz_t rop, p_minus_one, one, base;
-	mpz_inits(rop, p_minus_one, one, base, NULL); // Initialize variables.
-	mpz_set_ui(base, 2);
-	mpz_set_ui(one, 1);
-	if (mpz_cmp_ui(p, 0) == 0) {
-		mpz_add_ui(p, p, 1); // Checks if p is odd. If not, add 1 to p and return (recursion).
-		fermat_algorithm(p);
+void fermat_gmp(mpz_t p) {
+	mpz_t rop;
+	mpz_t a;
+	mpz_t p_min;
+	mpz_inits(a, rop, p_min, NULL);
+	mpz_set_ui(a, 2);
+	mpz_sub_ui(p_min, p, 1);
+
+	if (mpz_odd_p(p) == 0) {
+		mpz_add_ui(p, p, 1);
+		fermat_gmp(p);
 	}
 
 	else {
-		mpz_sub_ui(p_minus_one, p, 1); // Sets p_minus_one to p-1.
-		mpz_powm(rop, base, p_minus_one, p); // Checks theorem: a^p-1 cong 1 mod p
+		mpz_powm(rop, a, p_min, p);
 		if (mpz_cmp_ui(rop, 1) == 0) {
-			gmp_printf("%Zd", p);
+			gmp_printf("%Zd is prime \n", p);
 		}
 		else {
 			mpz_add_ui(p, p, 2);
-			fermat_algorithm(p);
+			fermat_gmp(p);
 		}
+		
 	}
 }
 
@@ -87,9 +86,8 @@ int main(int argc, char *argv[])
 	// Initialize rop variable.
 	mpz_t random_number;
 	mpz_init(random_number); 
-	mpz_set_ui(random_number, 6);
-//	impz_random(random_number, range);
+	impz_random(random_number, range);
 
-	fermat_algorithm(random_number);
+	fermat_gmp(random_number);
 return 0;
 }
