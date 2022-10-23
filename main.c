@@ -4,36 +4,6 @@
 #include <sys/random.h>
 #include <gmp.h>
 
-
-//typedef struct RSAPROFILE
-//{
-//	char q, p, public_exp, phi, mod_inv [];
-//} rsa_p;
-//
-//mpz_t* extended_gcd(mpz_t public_exp, mpz_t phi)
-//{
-//	mpz_t inverse;
-//	mpz_set_ui(inverse, 1077);
-//	mpz_t* inv = &inverse;
-//	return inv;	
-//}
-//
-//char rsa_gen(uint16_t bit_size, char* mr_flag) // blueprint for generating RSA key pairs.
-//{
-//	rsa_p rsaprofile;
-//
-//	rsaprofile.p = pgen(bit_size);
-//	rsaprofile.q = pgen(bit_size);
-//	rsaprofile.public_exp = "65537";
-//	if (mr_flag != NULL) {
-//		rsaprofile.p = miller_rabin(rsaprofile.p);
-//		rsaprofile.q = miller_rabin(rsaprofile.q);
-//	}
-//
-//	rsaprofile.phi = phi_func(rsaprofile.p, rsaprofile.q);
-//	rsaprofile.mod_inv =  extended_gcd(rsaprofile.public_exp, rsaprofile.p);
-//}
-
 uint64_t rand_seed() { // Generates seed which can be used by libgmp to generate larger random integers.
 	uint64_t buffer;
 	size_t buf_len = 8; // Buffer length in bytes. Variable buffer is uint64_t, therefore 8 bytes should be read from /dev/urandom.
@@ -69,6 +39,7 @@ void fermat_gmp(mpz_t p) {
 		mpz_powm(rop, a, p_min, p);
 		if (mpz_cmp_ui(rop, 1) == 0) {
 			gmp_printf("%Zd is prime \n", p);
+			return;
 		}
 		else {
 			mpz_add_ui(p, p, 2);
@@ -78,16 +49,55 @@ void fermat_gmp(mpz_t p) {
 	}
 }
 
+void fermat_factorization(mpf_t N) {
+	// Fermat's factorization method is an algorithm for finding two factors of an odd number.
+	// This method is efficient when the two factors are close to each other, requiring only a few iterations to find them.
+	// In a case where the factors are distant, this method is only slightly more efficient than trial division.
+	// Requirements:
+	// (1): N is an odd integer with non-trivial factors.
+	
+	// n = a^2 - b^2
+	//   = (a + b)(a - b)
+	//
+	// a = ceil(sqrt(N))
+	// b = sqrt(a^2 - N)
+	// while (b != int) {
+	// 	a = a + 1
+	// 	b = sqrt(a^2 - N)
+	// }
+	// return a - b, a + b
+
+	mpf_t a, a2, b;
+	mpf_inits(a, a2, b, NULL);
+	mpf_sqrt(a, N); mpf_ceil(a, a); // Set a to square root of N. Apply ceiling function to a.
+	gmp_printf("%Ff is a\n", a);
+	return;
+	mpf_mul(a2, a, a); mpf_sub(a2, a, N); // Set a2 to a^2 - N.
+	mpf_sqrt(b, a2); // b = sqrt(a^2 - N)
+	
+	while (mpf_integer_p(b) != 0) { // While b is not an integer.
+		mpf_add_ui(a, a, 1);
+		mpf_mul(a2, a, a); mpf_sub(a2, a, N); // Set a2 to a^2 - N.
+		mpf_sqrt(b, a2); // b = sqrt(a^2 - N)
+	}
+	mpf_sub(a, a, b);
+	gmp_printf("%Ff is a\n", a);
+	mpf_add(a, a, b); mpf_sub(a, b, a);
+	gmp_printf("%Ff is b\n", a);
+}
+
 int main(int argc, char *argv[])
 {
 	// Convert argv to uint and assign it to range. Pointer throwaway_ptr points to chars in argv which is irrelevant for our inteded purposes.
-	char *throwaway_ptr;
-	mp_bitcnt_t range = strtol(argv[1], &throwaway_ptr, 10);
-	// Initialize rop variable.
-	mpz_t random_number;
-	mpz_init(random_number); 
-	impz_random(random_number, range);
-
-	fermat_gmp(random_number);
+	//char *throwaway_ptr;
+	//mp_bitcnt_t range = strtol(argv[1], &throwaway_ptr, 10);
+	//// Initialize rop variable.
+	mpf_t random_number;
+	mpf_init(random_number); 
+	mpf_set_ui(random_number, 303);
+//	impz_random(random_number, range);
+	
+	fermat_factorization(random_number);
+//	fermat_gmp(random_number);
 return 0;
 }
