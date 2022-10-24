@@ -1,3 +1,6 @@
-void isqrt(mpq_t N) {
+#include <gmp.h>
 
+
+void isqrt(mpq_t N) {
+		
 }

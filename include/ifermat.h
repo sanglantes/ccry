@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <gmp.h>
-
+#include <math.h>
 void fermat_gmp(mpz_t p) {
 	mpz_t rop;
 	mpz_t a;
@@ -28,12 +28,10 @@ void fermat_gmp(mpz_t p) {
 	}
 }
 
-void fermat_factorization(mpf_t N, mpf_t a, mpf_t b) {
-	// Fermat's factorization method is an algorithm for finding two factors of an odd number.
+void fermat_factorization(mpf_t N, mpf_t p, mpf_t q) { 
+	// Fermat's factorization method is an algorithm for finding two factors of an integer.
 	// This method is efficient when the two factors are close to each other, requiring only a few iterations to find them.
 	// In a case where the factors are distant, this method is only slightly more efficient than trial division.
-	// Requirements:
-	// (1): N is an odd integer with non-trivial factors.
 	
 	// n = a^2 - b^2
 	//   = (a + b)(a - b)
@@ -45,8 +43,8 @@ void fermat_factorization(mpf_t N, mpf_t a, mpf_t b) {
 	// 	b = sqrt(a^2 - N)
 	// }
 	// return a - b, a + b
-	mpf_t a2, temp_a;
-	mpf_inits(a2, temp_a, NULL);
+	mpf_t a2, a, b;
+	mpf_inits(a2, a, b, NULL);
 	mpf_sqrt(a, N); mpf_ceil(a, a); // Set a to square root of N. Apply ceiling function to a.
 	mpf_mul(a2, a, a); mpf_sub(a2, a2, N); // Set a2 to a^2 - N.
 	mpf_sqrt(b, a2); // b = sqrt(a^2 - N)
@@ -56,9 +54,38 @@ void fermat_factorization(mpf_t N, mpf_t a, mpf_t b) {
 		mpf_mul(a2, a, a); mpf_sub(a2, a2, N); // Set a2 to a^2 - N.
 		mpf_sqrt(b, a2); // b = sqrt(a^2 - N)
 	}
-	mpf_set(temp_a, a);
-	mpf_add(a, a, b);
-	mpf_sub(temp_a, a, b); mpf_sub(temp_a, a, b);
-	mpf_set(b, temp_a);
+	// Set p and q to results.	
+	mpf_add(p, a, b);
+	mpf_sub(q, a, b); 
 }
+
+void fermat_factorization_f(long double N, long double p, long double q) {
+	long double a, b, b2;
+	a = sqrt(N); a = ceil(a);
+	b2 = pow(a, 2); b2 -= N;
+	b = sqrt(b2);
+	
+	while (floor(b) != ceil(b)) {
+		a += 1;
+		b2 = pow(a, 2); b2 -= N;
+		b = sqrt(b2);
+	}
+	p = a + b;
+	q = a - b;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
