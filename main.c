@@ -15,8 +15,10 @@ int main(int argc, char *argv[])
 	// Pointer throwaway_ptr points to strings in argv which is irrelevant for our inteded purposes.
 	char *throwaway_ptr;
 	unsigned long int N_int = strtol(argv[1], &throwaway_ptr, 10);
-	mpf_t N;
+	mpf_t N, p, q;
+	mpf_inits(p, q, NULL);
 	mpf_init_set_ui(N, N_int);
-	fermat_factorization(N);
+	fermat_factorization(N, p, q);
+	gmp_printf("%Ff\n%Ff\n", p, q);
 return 0;
 }

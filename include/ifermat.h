@@ -28,7 +28,7 @@ void fermat_gmp(mpz_t p) {
 	}
 }
 
-void fermat_factorization(mpf_t N, mpz_t p, mpz_t q) {
+void fermat_factorization(mpf_t N, mpf_t a, mpf_t b) {
 	// Fermat's factorization method is an algorithm for finding two factors of an odd number.
 	// This method is efficient when the two factors are close to each other, requiring only a few iterations to find them.
 	// In a case where the factors are distant, this method is only slightly more efficient than trial division.
@@ -45,9 +45,8 @@ void fermat_factorization(mpf_t N, mpz_t p, mpz_t q) {
 	// 	b = sqrt(a^2 - N)
 	// }
 	// return a - b, a + b
-
-	mpf_t a, a2, b;
-	mpf_inits(a, a2, b, NULL);
+	mpf_t a2, temp_a;
+	mpf_inits(a2, temp_a, NULL);
 	mpf_sqrt(a, N); mpf_ceil(a, a); // Set a to square root of N. Apply ceiling function to a.
 	mpf_mul(a2, a, a); mpf_sub(a2, a2, N); // Set a2 to a^2 - N.
 	mpf_sqrt(b, a2); // b = sqrt(a^2 - N)
@@ -57,9 +56,9 @@ void fermat_factorization(mpf_t N, mpz_t p, mpz_t q) {
 		mpf_mul(a2, a, a); mpf_sub(a2, a2, N); // Set a2 to a^2 - N.
 		mpf_sqrt(b, a2); // b = sqrt(a^2 - N)
 	}
+	mpf_set(temp_a, a);
 	mpf_add(a, a, b);
-	mpz_set(p, a);
-	mpf_sub(a, a, b); mpf_sub(a, a, b);
-	mpz_set(q, b);
+	mpf_sub(temp_a, a, b); mpf_sub(temp_a, a, b);
+	mpf_set(b, temp_a);
 }
 
