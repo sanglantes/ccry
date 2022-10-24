@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <gmp.h>
 #include <math.h>
-void fermat_gmp(mpz_t p) {
+void gmp_fermat_ltheorem(mpz_t p) {
 	mpz_t rop;
 	mpz_t a;
 	mpz_t p_min;
@@ -11,7 +11,7 @@ void fermat_gmp(mpz_t p) {
 
 	if (mpz_odd_p(p) == 0) {
 		mpz_add_ui(p, p, 1);
-		fermat_gmp(p);
+		gmp_fermat_ltheorem(p);
 	}
 
 	else {
@@ -22,13 +22,13 @@ void fermat_gmp(mpz_t p) {
 		}
 		else {
 			mpz_add_ui(p, p, 2);
-			fermat_gmp(p);
+			gmp_fermat_ltheorem(p);
 		}
 		
 	}
 }
 
-void fermat_factorization(mpf_t N, mpf_t p, mpf_t q) { 
+void gmp_fermat_factorization(mpf_t N, mpf_t p, mpf_t q) { 
 	// Fermat's factorization method is an algorithm for finding two factors of an integer.
 	// This method is efficient when the two factors are close to each other, requiring only a few iterations to find them.
 	// In a case where the factors are distant, this method is only slightly more efficient than trial division.
