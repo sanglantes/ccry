@@ -15,13 +15,11 @@ int main(int argc, char *argv[])
 	// Pointer throwaway_ptr points to strings in argv which is irrelevant for our inteded purposes.
 	char *throwaway_ptr;
 	long double N_int = strtol(argv[1], &throwaway_ptr, 10);
-	mpf_set_default_prec(4096);
+
 	mpf_t N, p, q;
 	mpf_inits(N, p, q, NULL);
-	mpz_t k;
-	mpz_init_set_str(k, "18446744073709551617", 10);
-	mpf_set_z(N, k);
+	mpf_set_ui(N, N_int);
 	gmp_fermat_factorization(N, p, q);
-	gmp_printf("%Ff\n%Ff", p, q);
+	gmp_printf("%Ff\n%Ff\n", p, q);
 return 0;
 }
