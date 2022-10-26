@@ -43,6 +43,7 @@ void gmp_fermat_factorization(mpf_t N, mpf_t p, mpf_t q) {
 	// 	b = sqrt(a^2 - N)
 	// }
 	// return a - b, a + b
+	mpf_set_default_prec(4096);
 	mpf_t a2, a, b;
 	mpf_inits(a2, a, b, NULL);
 	mpf_sqrt(a, N); mpf_ceil(a, a); // Set a to square root of N. Apply ceiling function to a.
