@@ -35,8 +35,10 @@ void rsa_profile(mp_bitcnt_t bit_size) {
 	fclose(public_fptr);
 }
 
-int rsa_sign_message(char message[], char key_location[]) { // EXPERIMENTAL FUNCTION. UNFINISHED.
-	// Takes a < bit_size message, hashes its contents, and signs the hash.
+int rsa_sign_message(char message[], char key_location[]) {
+	// Signs a hash with private RSA key.
+	// (m^d)^e === m mod n
+	// (m^e)^d === m mod n
 	mpz_t o, d;
 	FILE* key_fptr = fopen(key_location, "r");
 	if (key_fptr == NULL) {
@@ -47,7 +49,8 @@ int rsa_sign_message(char message[], char key_location[]) { // EXPERIMENTAL FUNC
 	fscanf(key_fptr, "%s %s", phi_value, private_exponent);
 	mpz_init_set_str(o, phi_value, 16);
 	mpz_init_set_str(d, private_exponent, 16);
-	gmp_printf("%Zd\n%Zd\n", o, d);
+
+	sha1_hash(message);
 	return 0;
 }
 

@@ -4,7 +4,7 @@
 int main() {
 	mpz_t rop, range, hk;
 	mpz_inits(rop, range, hk, NULL);
-	mpz_set_str(range, "50000", 10);
+	mpz_set_str(range, "598589438387455", 10);
 	mpz_nextprime(rop, range);
 	mpz_set(hk, rop);
 	mpz_nextprime(hk, rop);
