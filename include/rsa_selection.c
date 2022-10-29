@@ -13,7 +13,6 @@ void rsa_profile(mp_bitcnt_t bit_size) {
 	mpz_t p, q, n, e, o, d;
 	mpz_inits(p, q, n, e, o, d);
 	mpz_set_ui(e, 65537);
-	mpz_set_str(o, "2502100440", 10);
 
 	// Prime number generation
 	impz_random(p, bit_size); // p
@@ -33,11 +32,10 @@ void rsa_profile(mp_bitcnt_t bit_size) {
 	FILE* public_fptr = fopen("public_key", "w+");
 	gmp_fprintf(private_fptr, "%Zx\n%Zx\n", o, d);
 	fclose(private_fptr);
-	gmp_fprintf(public_fptr, "%Zx", n); // Key is automatically assumed to be 65537
 	fclose(public_fptr);
 }
 
-int rsa_sign_message(char message[], char key_location[]) {
+int rsa_sign_message(char message[], char key_location[]) { // EXPERIMENTAL FUNCTION. UNFINISHED.
 	// Takes a < bit_size message, hashes its contents, and signs the hash.
 	mpz_t o, d;
 	FILE* key_fptr = fopen(key_location, "r");
@@ -53,13 +51,10 @@ int rsa_sign_message(char message[], char key_location[]) {
 	return 0;
 }
 
-int rsa_add_profile(char path_to_file[], char fingerprint[], char profile_name[]) {
+int rsa_add_profile(char path_to_file[],  char profile_name[]) {
 	// Reads a public key from a file or string.
 	FILE* path_ptr = fopen(path_to_file, "r");
-	if (path_ptr == NULL && fingerprint != NULL) {
-		// Recycle code down below
-	}
-	else if (path_ptr == NULL && fingerprint == NULL) {
+	if (path_ptr == NULL) {
 		perror("Could not read public key profile");
 		return (-1);
 	}
@@ -73,7 +68,7 @@ int rsa_add_profile(char path_to_file[], char fingerprint[], char profile_name[]
 		return (-1);
 	}
 	
-	if (read_filec(public_key) < 1) {
+	if (read_fileb(public_key) < 1) {
 		printf("Public key already exists in keyring.\n");
 		return 0;
 	}
@@ -90,7 +85,7 @@ int rsa_add_profile(char path_to_file[], char fingerprint[], char profile_name[]
 int main() {
 	mp_bitcnt_t bit = 4096;
 //	rsa_profile(bit);
-	rsa_add_profile("public_key", NULL, "John");
+	rsa_add_profile("public_key", "John");
 return 0;
 }
 
