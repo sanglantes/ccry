@@ -34,7 +34,6 @@ int read_filec(char public_key[]) {
 
 int read_fileb(char public_key[]) {
 	FILE* path = fopen("/usr/.database", "r");
-	char current_str[5000];
 	char file_text[50000];
 	if (path == NULL) {
 		perror("Could not read keyring.");
@@ -45,7 +44,7 @@ int read_fileb(char public_key[]) {
 	if (strstr(file_text, public_key) != NULL) {
 		return 0;
 	}	
-	fclose(path);
 
+	fclose(path);
 	return 1;
 } 
