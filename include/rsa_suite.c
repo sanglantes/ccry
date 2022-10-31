@@ -12,27 +12,38 @@ void rsa_profile(mp_bitcnt_t bit_size) {
 	
 	// Initialization
 	mpz_t p, q, n, e, o, d;
-	mpz_inits(p, q, n, e, o, d);
+	mpz_inits(p, q, n, e, o, d, NULL);
 	mpz_set_ui(e, 65537);
 
 	// Prime number generation
 	impz_random(p, bit_size); // p
+	mpz_nextprime(p, p);
 	impz_random(q, bit_size); // q
+	mpz_nextprime(q, q);
 	mpz_mul(n, p, q); // n = pq
 
 	// phi(n) = (p - 1)(q - 1)
-	mpz_sub_ui(p, p, 1); mpz_sub_ui(q, q, 1);
-	mpz_mul(o, p, q);
+	mpz_t temp_p, temp_q;
+	mpz_inits(temp_p, temp_q, NULL);
+	mpz_sub_ui(temp_p, p, 1); mpz_sub_ui(temp_q, q, 1);
+	mpz_mul(o, temp_p, temp_q);
 	
 	// d is the multiplicative modular inverse of e mod o.
 	// Find a d such that ed = 1 (mod o)
 	mpz_invert(d, e, o);
 
 	// Create file streams
-	FILE* private_fptr = fopen("private_key", "w+");
-	FILE* public_fptr = fopen("public_key", "w+");
+	FILE* private_fptr = fopen("private_key", "w");
+	FILE* public_fptr = fopen("public_key", "w");
+	if (private_fptr == NULL || public_fptr == NULL) {
+		perror("Could not create profile.");
+		return;
+	}
 	// Write (n, d) to private profile. Although n is public, it is used in digital signatures. Storing it together with d facilitates the signing process.
 	// Write (n) to public profile.
+	
+	gmp_printf("p: %Zd\nq: %Zd\nn: %Zd\no: %Zd\nd: %Zd\n", p, q, n, o, d);
+
 	gmp_fprintf(private_fptr, "%Zx\n%Zx\n", d, n);
 	gmp_fprintf(public_fptr, "%Zx\n", n);
 
@@ -72,29 +83,23 @@ int mpz_rsa_read_msg(mpz_t signed_hash, char original_message[], char path_to_pu
 		perror("Could not read publisher key");	
 		return (-1);
 	}
+
 	char str_publisher_key[MAX_KEY_LENGTH]; // String to be converted to mpz_t
 	fscanf(pptr, "%s", str_publisher_key); // str_publisher_key is set to publisher public key
-
-	mpz_t publisher_key, decrypted_hash;
-	mpz_init_set_str(publisher_key, str_publisher_key, 16); // Set str ver to mpz type
+	mpz_t publisher_key;
+	mpz_init_set_str(publisher_key, str_publisher_key, 16);
+	// Decrypt hash
+	mpz_t decrypted_hash;
 	mpz_init(decrypted_hash);
-	// Hash the orignal message to independently verify the signed hash.
-	char independent_hash[41];
-	mpz_t mpz_independent_hash;
-	sha1_hash(original_message, independent_hash);
-
-	// Decrypt the signed hash.
-	char str_decrypted_hash[4096];
-	char final_d_hash[4096];
 	mpz_powm_ui(decrypted_hash, signed_hash, 65537, publisher_key);
-	gmp_sprintf(str_decrypted_hash, "%s", decrypted_hash);
-//	sha1_hash(str_decrypted_hash, final_d_hash);
 
-	// decrypted_hash and independent_hash should be equal, if not, the message does not match the signature.
-	mpz_init_set_str(mpz_independent_hash, independent_hash, 16);
+	// Commence independent investigation
+	char ind_hash[41];
+	mpz_t independent_hash; 
+	sha1_hash(original_message, ind_hash);
+	mpz_init_set_str(independent_hash, ind_hash, 16);
 
-	printf("%s\n\n\n\n\n%s\n", final_d_hash, independent_hash);
-
+	gmp_printf("%Zx\n\n%Zx", decrypted_hash, independent_hash);
 	fclose(pptr);
 	return 0;
 }
@@ -141,8 +146,6 @@ int main() {
 	mpz_t sign;
 	mpz_init(sign);
 	rsa_sign_msg("Hello", "private_key", sign);
-
 	mpz_rsa_read_msg(sign, "Hello", "public_key");
-return 0;
+	return 0;
 }
-
