@@ -7,7 +7,7 @@
 #include <openssl/sha.h>
 #define MAX_KEY_LENGTH 4096
 
-void rsa_profile(mp_bitcnt_t bit_size) {
+int rsa_profile(mp_bitcnt_t bit_size) {
 	// Generate RSA profile and output results to file.
 	
 	// Initialization
@@ -37,18 +37,17 @@ void rsa_profile(mp_bitcnt_t bit_size) {
 	FILE* public_fptr = fopen("public_key", "w");
 	if (private_fptr == NULL || public_fptr == NULL) {
 		perror("Could not create profile.");
-		return;
+		return (-1);
 	}
 	// Write (n, d) to private profile. Although n is public, it is used in digital signatures. Storing it together with d facilitates the signing process.
 	// Write (n) to public profile.
 	
-	gmp_printf("p: %Zd\nq: %Zd\nn: %Zd\no: %Zd\nd: %Zd\n", p, q, n, o, d);
-
 	gmp_fprintf(private_fptr, "%Zx\n%Zx\n", d, n);
 	gmp_fprintf(public_fptr, "%Zx\n", n);
 
 	fclose(private_fptr);
 	fclose(public_fptr);
+	return 1;
 }
 
 int rsa_sign_msg(char message[], char key_location[], mpz_t signature) {
@@ -77,11 +76,40 @@ int rsa_sign_msg(char message[], char key_location[], mpz_t signature) {
 	return 0;
 }
 
-int mpz_rsa_read_msg(mpz_t signed_hash, char original_message[], char path_to_publisher[]) {
+int verify_signature(char original_message[], char path_to_publisher[], char name_of_publisher[], mpz_t signed_hash) {
+	// Verify signatures of hashes. Returns 1 if the signature is valid, 0 if it is not, and -1 on failure.
 	FILE* pptr = fopen(path_to_publisher, "r"); // Init file ptr.
-	if (pptr == NULL) {
+	if (pptr == NULL && name_of_publisher == NULL) {
 		perror("Could not read publisher key");	
 		return (-1);
+	}
+
+	if (path_to_publisher == NULL) {
+		char output[5000];
+		char key[5000];
+		read_fileb(name_of_publisher, output);
+
+		mpz_t publisher_key;
+		mpz_init_set_str(publisher_key, output, 16);
+		// Decrypt hash
+		mpz_t decrypted_hash;
+		mpz_init(decrypted_hash);
+		mpz_powm_ui(decrypted_hash, signed_hash, 65537, publisher_key);
+	
+		// Commence independent investigation
+		char ind_hash[41];
+		mpz_t independent_hash; 
+		sha1_hash(original_message, ind_hash);
+		mpz_init_set_str(independent_hash, ind_hash, 16);
+
+		if (mpz_cmp(independent_hash, decrypted_hash) == 0) {
+			return 1;		
+		}
+		
+		else {
+			return 5;
+		}
+
 	}
 
 	char str_publisher_key[MAX_KEY_LENGTH]; // String to be converted to mpz_t
@@ -98,17 +126,15 @@ int mpz_rsa_read_msg(mpz_t signed_hash, char original_message[], char path_to_pu
 	mpz_t independent_hash; 
 	sha1_hash(original_message, ind_hash);
 	mpz_init_set_str(independent_hash, ind_hash, 16);
-
-	gmp_printf("%Zx\n\n%Zx", decrypted_hash, independent_hash);
+	
 	fclose(pptr);
-	return 0;
-}
 
-void rsa_read_msg(char signed_hash[], char original_message[], char path_to_publisher[]) {
-	// Simply a macro for the equivalent mpz function. Facilitates conversions.
-	mpz_t n_signed_hash;
-	mpz_init_set_str(n_signed_hash, signed_hash, 16);
-	mpz_rsa_read_msg(n_signed_hash, original_message, path_to_publisher);
+	if (mpz_cmp(independent_hash, decrypted_hash) == 0) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 
 int rsa_add_profile(char path_to_file[],  char profile_name[]) {
@@ -127,11 +153,13 @@ int rsa_add_profile(char path_to_file[],  char profile_name[]) {
 		perror("Could not access keyring file");
 		return (-1);
 	}
-	
-	if (read_fileb(public_key) < 1) {
+	char output[5000];	
+	if (read_fileb(public_key, output) != 1) {
 		printf("Public key already exists in keyring.\n");
 		return 0;
 	}
+
+	else if (read_fileb(public_key, output) != 0) {read_fileb(public_key, output);}
 	
 	fputs(profile_name, keyring);
 	fputs("\t", keyring);
@@ -139,13 +167,11 @@ int rsa_add_profile(char path_to_file[],  char profile_name[]) {
 	fputs("\n", keyring);
 
 	fclose(keyring);
-	return 1;
-}
 
-int main() {
-	mpz_t sign;
-	mpz_init(sign);
-	rsa_sign_msg("Hello", "private_key", sign);
-	mpz_rsa_read_msg(sign, "Hello", "public_key");
-	return 0;
+	//Bodge: add names in seperate file.
+	FILE* name_f = fopen("/usr/.userl", "a");
+	fputs(profile_name, name_f);
+	fputs("\n", name_f);
+	fclose(name_f);
+	return 1;
 }

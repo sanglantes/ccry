@@ -1,25 +1,59 @@
 #include <stdio.h>
-#include <stdlib.h> // Needed for strtol and malloc.
+#include <assert.h>
+#include <stdlib.h> 
+#include <unistd.h>
 #include <gmp.h>
-#include "include/ifermat.h"
-#include "include/irandom.h"
+#include "rsa_control_panel.h"
+int main();
+void rsa_interface() {
+	system("clear");
+	int option;
+	printf("Select an option (0 to go back):\n(1) Generate RSA profile\n(2) Sign message\n(3) Verify message\n(4) Add key to keyring\n(5) Encrypt message\n\n>> ");
+	scanf("%2d", &option);
 
-void isqrt(mpq_t N) {
-	// Function that finds the square root of an arbitrary length mpq_t type.
+	switch (option) {
+		case 0: main();
+			break;
+		case 1:	generate_rsa_profile();
+		       break;
+		case 2: sign_rsa_message();
+			break;
+		case 3: verify_rsa_message();
+			break;
+		case 4: add_to_keyring();
+			break;
+		case 5: encrypt_message();
+			break;	
+		default: printf("Invalid option '%d'.\n", option);
+			 assert(option >= 0 && option <= 5);
+	}
 
 }
+void cryptanalysis_interface() {}
 
-int main(int argc, char *argv[])
+int main()
 {
-	// Convert argv to uint and assign it to range.
-	// Pointer throwaway_ptr points to strings in argv which is irrelevant for our inteded purposes.
-	char *throwaway_ptr;
-	long double N_int = strtol(argv[1], &throwaway_ptr, 10);
+	system("clear");
+	puts("* * * * * * * * * * * * * * * * * * * * *");
+	puts("* ccry - The NIX cryptographic toolbox  *");
+	puts("* * * * * * * * * * * * * * * * * * * * *");
+	puts("\n");
+	int option;
+	printf("Select an option (0 to exit):\n(1) RSA interface\n(2) Cryptanalytic tools\n\n>> ");
+	scanf("%2d", &option);
+	
+	switch (option)
+	{
+		case 0: return 0;
 
-	mpf_t N, p, q;
-	mpf_inits(N, p, q, NULL);
-	mpf_set_ui(N, N_int);
-	gmp_fermat_factorization(N, p, q);
-	gmp_printf("%Ff\n%Ff\n", p, q);
+		case 1: rsa_interface();
+			break;
+
+		case 2: cryptanalysis_interface();
+			break;
+
+		default: printf("Invalid option '%d'. Press CTRL+C to return to menu.\n", option);
+			 main();
+	}
 return 0;
 }
