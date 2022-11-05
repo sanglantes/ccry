@@ -107,7 +107,7 @@ int verify_signature(char original_message[], char path_to_publisher[], char nam
 		}
 		
 		else {
-			return 5;
+			return 0;
 		}
 
 	}
@@ -154,13 +154,11 @@ int rsa_add_profile(char path_to_file[],  char profile_name[]) {
 		return (-1);
 	}
 	char output[5000];	
-	if (read_fileb(public_key, output) != 1) {
+	if (read_fileb(public_key, output) != 0) {
 		printf("Public key already exists in keyring.\n");
 		return 0;
 	}
 
-	else if (read_fileb(public_key, output) != 0) {read_fileb(public_key, output);}
-	
 	fputs(profile_name, keyring);
 	fputs("\t", keyring);
 	fputs(public_key, keyring);
