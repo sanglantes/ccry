@@ -74,7 +74,6 @@ int verify_rsa_message() {
 
 	printf("Enter signature: \n>> ");
 	scanf("%s", signature);
-//	signature[strlen(signature) - 1] = '\0'; 
 	mpz_t mp_sig;
 	mpz_init_set_str(mp_sig, signature, 16);
 

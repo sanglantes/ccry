@@ -5,6 +5,7 @@
 #include <gmp.h>
 #include "rsa_control_panel.h"
 #include "cryptanalytic_control_panel.h"
+
 int main();
 void rsa_interface() {
 	system("clear");
@@ -32,18 +33,16 @@ void cryptanalysis_interface() {
 	system("clear");
 	int option;
 	
-	printf("Select an option (0 to go back):\n(1) Fermat's factorization algorithm for composites smaller than 2^63-1 (GMP version)\n(2) FF for composites smaller than 2^63-1 (stadard floating points)\n(3) Pollard rho's factorization algorithm\n>> ");	
+	printf("Select an option (0 to go back):\n(1) Fermat's factorization algorithm for composites smaller than 2^63-1 (GMP version)\n(2) Pollard rho's factorization algorithm\n>> ");
 	scanf("%d", &option);
 	switch (option) {
 		case 0: main();
 		case 1: gmp_ferm();
 			break;
-		case 2: float_ferm();
-			break;
-		case 3: pollard_rho();
+		case 2: pollard_rho();
 			break;
 		default: printf("Invalid option '%d'.\n", option);
-			 assert(option >= 0 && option <= 3);
+			 assert(option >= 0 && option <= 2);
 	}
 }
 

@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "rsa_suite.h"
+#include "imath.h"
 
 int main() {
-	mpz_t sign;
-	mpz_init(sign);
-	rsa_profile(161);
-	rsa_add_profile("public_key", "Jon"); 
+	long double N, a, b;
+	N = 303;
+	fermat_factorization_f(N, a, b);
+	printf("%Lf\n%Lf\n", a, b);
 	return 0;
 }
