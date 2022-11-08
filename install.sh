@@ -21,4 +21,4 @@ else
 	echo -e "\e[42mlibgmp installed succesfully\e[0m"
 fi
 
-gcc main.c -o main -lgmp -lm
+gcc main.c -o ccry -lgmp -lm -lssl -lcrypto
